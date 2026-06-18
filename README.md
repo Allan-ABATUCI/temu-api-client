@@ -1,7 +1,7 @@
-# temu/ — Documentation technique du package
+# temu-api-client — Client Python pour l'API Temu Open Platform
 
-**Auteur :** Allan Abatucipro  
-**Dernière modification :** 2026-06-09
+**Auteur :** Allan ABATUCI  
+**Dernière modification :** 2026-06-18
 
 ---
 
