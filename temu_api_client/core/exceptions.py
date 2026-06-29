@@ -3,14 +3,16 @@ Temu Open Platform API — Exceptions typées
 
 Hiérarchie :
     TemuAPIError
-    ├── AuthError        401 / 403 / signature invalide
-    ├── RateLimitError   429 / quota dépassé
-    ├── NotFoundError    404
-    ├── ServerError      5xx
-    └── NetworkError     timeout, connexion perdue
+    ├── AuthError           401 / 403 / signature invalide
+    ├── RateLimitError      429 / quota dépassé
+    ├── NotFoundError       404
+    ├── ServerError         5xx
+    ├── NetworkError        timeout, connexion perdue
+    ├── ComplianceError     compliance edit failed (result.success=false)
+    └── ProductBlockedError product in processing/review, cannot be edited
 
 Auteur  : Allan ABATUCI
-Modifié : 2026-06-09
+Modifié : 2026-06-29
 """
 
 
@@ -60,3 +62,11 @@ class ServerError(TemuAPIError):
 
 class NetworkError(TemuAPIError):
     """Erreur réseau bas niveau (timeout, connexion interrompue)."""
+
+
+class ComplianceError(TemuAPIError):
+    """Compliance edit returned result.success=false without error details."""
+
+
+class ProductBlockedError(TemuAPIError):
+    """Product is in processing or under review and cannot be edited."""
