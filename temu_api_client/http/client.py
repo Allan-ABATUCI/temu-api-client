@@ -89,6 +89,8 @@ class TemuHTTPClient:
                 "log_type": "request", "method": "POST", "url": url,
                 "action": action, "status_code": resp.status_code,
                 "duration_ms": round(duration_ms, 2),
+                "request_body": params,
+                "response_body": resp.text[:2000],
             })
 
             if resp.status_code == 200:
@@ -131,6 +133,7 @@ class TemuHTTPClient:
             logger.error("api_error_metier", extra={
                 "log_type": "request", "action": action,
                 "error_code": error_code, "error_msg": msg,
+                "response_body": body,
             })
             if error_code in ("40001", "40002", "40003"):
                 raise AuthError(msg, status_code=200, error_code=error_code)
@@ -162,12 +165,12 @@ class TemuHTTPClient:
                     f"Rate limit dépassé sur {action}",
                     retry_after=retry_after, status_code=429, response_body=body,
                 )
-            logger.warning("rate_limit", extra={"action": action, "tentative": attempt + 1, "max_retries": self.max_retries})
+            logger.warning("rate_limit", extra={"action": action, "attempt": attempt + 1, "max_retries": self.max_retries})
             return retry_after
         if code >= 500:
             if attempt >= self.max_retries:
                 raise ServerError(f"Erreur serveur ({code}) sur {action}", status_code=code, response_body=body)
-            logger.warning("erreur_serveur", extra={"code": code, "action": action, "tentative": attempt + 1, "max_retries": self.max_retries})
+            logger.warning("erreur_serveur", extra={"code": code, "action": action, "attempt": attempt + 1, "max_retries": self.max_retries})
             return None
 
         raise TemuAPIError(f"Réponse inattendue ({code}) sur {action}", status_code=code, response_body=body)
@@ -175,5 +178,5 @@ class TemuHTTPClient:
     def _wait(self, attempt: int, retry_after: int | None = None) -> None:
         exp_delay = min(self.BACKOFF_BASE * (self.BACKOFF_FACTOR ** attempt), config.MAX_BACKOFF_SECONDS)
         delay = max(exp_delay, float(retry_after or 0))
-        logger.warning("retry", extra={"delai_s": round(delay, 1)})
+        logger.warning("retry", extra={"delay_s": round(delay, 1)})
         time.sleep(delay)
